@@ -47,12 +47,6 @@ st.markdown(
         color: #fff; margin: 0; padding: 0; font-weight: 700; line-height: 1.15;
         font-size: clamp(1.55rem, 4.2vw, 2.3rem);
       }}
-      .hero p {{ margin: .45rem 0 0 0; font-size: clamp(.92rem, 2.2vw, 1.05rem); opacity: .93; max-width: 46rem; }}
-      .steps {{ display: flex; gap: .6rem; flex-wrap: wrap; margin-top: 1rem; }}
-      .step {{
-        background: rgba(255,255,255,.16); border-radius: 999px; padding: .28rem .85rem;
-        font-size: .85rem; font-weight: 500; white-space: nowrap;
-      }}
 
       [data-testid="stVerticalBlockBorderWrapper"] {{
         background: #FFFFFF; border-radius: 16px; border: 1px solid #DCE7F5;
@@ -69,12 +63,6 @@ st.markdown(
         background: {BLUE_DARK}; border-color: {BLUE_DARK}; color: #fff;
       }}
       [data-testid="stMetricValue"] {{ color: {BLUE_DARK}; }}
-      .disclaimer {{
-        background: #FFF8E6; border: 1px solid #F3DDA0; color: #5B4500; border-radius: 12px;
-        padding: .65rem .9rem; font-size: .9rem; margin: 0 0 1rem 0;
-      }}
-      .app-footer {{ color: #5B6B80; font-size: .85rem; text-align: center; margin-top: 1.5rem; }}
-      .app-footer a {{ color: {BLUE}; }}
 
       @media (max-width: 640px) {{
         .block-container {{ padding-left: 1rem; padding-right: 1rem; padding-top: 3.4rem; }}
@@ -84,13 +72,6 @@ st.markdown(
 
     <div class="hero">
       <h1>Chest X-Ray Classification</h1>
-      <p>Upload a chest X-ray and a pretrained deep-learning model returns a research-grade
-      suggestion, flagging images it is unsure about or cannot classify.</p>
-      <div class="steps">
-        <span class="step">1 &nbsp;Upload</span>
-        <span class="step">2 &nbsp;Classify</span>
-        <span class="step">3 &nbsp;Review the result</span>
-      </div>
     </div>
     """,
     unsafe_allow_html=True,
@@ -136,12 +117,6 @@ with st.sidebar:
         "Scores are raw model outputs and are not calibrated medical probabilities. "
         "Uploaded images are processed in memory and are not stored by this app."
     )
-
-st.markdown(
-    f'<div class="disclaimer">⚠️ {DISCLAIMER.replace("**", "")} Always consult a qualified '
-    "healthcare professional.</div>",
-    unsafe_allow_html=True,
-)
 
 # --------------------------------------------------------------------------- result rendering
 
@@ -281,11 +256,3 @@ with result_col:
             st.info("Press **Classify X-ray** to run the model on this image.")
         elif uploaded is None and not clicked:
             st.caption("Your result will appear here after you upload an image and press the button.")
-
-# --------------------------------------------------------------------------- footer
-
-st.markdown(
-    f'<div class="app-footer">Model: <a href="{mu.REPO_URL}" target="_blank">{mu.REPO_ID}</a> · '
-    "Research and education only · Not a medical device · Not clinically validated.</div>",
-    unsafe_allow_html=True,
-)
