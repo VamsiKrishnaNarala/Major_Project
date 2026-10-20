@@ -1,0 +1,20 @@
+# CPU-only PyTorch wheels (the default Linux wheels on PyPI pull in multi-GB CUDA libraries,
+# which is too large for free hosting). Remove this line if it causes install problems; see README.
+--extra-index-url https://download.pytorch.org/whl/cpu
+
+# Versions below the model repository's inference.py was tested with (keras 3.14.1, torch 2.11,
+# scikit-learn 1.8.0, Python 3.13). scikit-learn must stay on 1.8.x: the OOD gate is a pickle.
+keras==3.14.1
+torch==2.11.0
+scikit-learn==1.8.0
+
+# App
+streamlit==1.66.0
+pandas
+altair
+
+# Shared
+numpy>=1.26,<3
+pillow>=10.0
+joblib>=1.3
+huggingface_hub>=0.30,<3
