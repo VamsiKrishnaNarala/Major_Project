@@ -17,37 +17,80 @@ st.set_page_config(
     page_title="Chest X-Ray Classification",
     page_icon="🫁",
     layout="wide",
-    initial_sidebar_state="expanded",
+    initial_sidebar_state="collapsed",
 )
 
 BLUE = "#1565C0"
+BLUE_DARK = "#0D47A1"
 LIGHT_BLUE = "#9DBFE8"
 
 DISCLAIMER = (
     "**Research and education only.** This application is not a medical device, has not been "
-    "clinically validated, and must not be used for diagnosis or treatment decisions. "
-    "Always consult a qualified healthcare professional."
+    "clinically validated, and must not be used for diagnosis or treatment decisions."
 )
 
+# The styling below does not depend on .streamlit/config.toml, so the look is the same even if
+# that file is missing from the repository.
 st.markdown(
     f"""
     <style>
-      .block-container {{ padding-top: 2rem; padding-bottom: 3rem; max-width: 1200px; }}
-      .app-header {{
-        background: linear-gradient(135deg, {BLUE} 0%, #1E88E5 100%);
-        color: #FFFFFF; border-radius: 14px; padding: 1.4rem 1.6rem; margin-bottom: 1.2rem;
+      .stApp {{ background: #F4F8FD; }}
+      [data-testid="stHeader"] {{ background: transparent; }}
+      .block-container {{ padding-top: 4.2rem; padding-bottom: 3rem; max-width: 1100px; }}
+
+      .hero {{
+        background: linear-gradient(120deg, {BLUE_DARK} 0%, {BLUE} 55%, #2B8CE6 100%);
+        border-radius: 18px; padding: 1.6rem 1.9rem; margin-bottom: 1rem; color: #fff;
+        box-shadow: 0 6px 18px rgba(21, 101, 192, .22);
       }}
-      .app-header h1 {{ color: #FFFFFF; margin: 0; padding: 0; font-size: clamp(1.5rem, 4vw, 2.3rem); }}
-      .app-header p {{ margin: .4rem 0 0 0; font-size: clamp(.9rem, 2.2vw, 1.05rem); opacity: .95; }}
+      .hero h1 {{
+        color: #fff; margin: 0; padding: 0; font-weight: 700; line-height: 1.15;
+        font-size: clamp(1.55rem, 4.2vw, 2.3rem);
+      }}
+      .hero p {{ margin: .45rem 0 0 0; font-size: clamp(.92rem, 2.2vw, 1.05rem); opacity: .93; max-width: 46rem; }}
+      .steps {{ display: flex; gap: .6rem; flex-wrap: wrap; margin-top: 1rem; }}
+      .step {{
+        background: rgba(255,255,255,.16); border-radius: 999px; padding: .28rem .85rem;
+        font-size: .85rem; font-weight: 500; white-space: nowrap;
+      }}
+
+      [data-testid="stVerticalBlockBorderWrapper"] {{
+        background: #FFFFFF; border-radius: 16px; border: 1px solid #DCE7F5;
+        box-shadow: 0 2px 10px rgba(21, 101, 192, .06);
+      }}
+      [data-testid="stFileUploader"] section {{
+        border: 2px dashed {LIGHT_BLUE}; background: #F5F9FF; border-radius: 12px;
+      }}
+      button[kind="primary"], [data-testid="stBaseButton-primary"] {{
+        background: {BLUE}; border: 1px solid {BLUE}; color: #fff; border-radius: 10px;
+        font-weight: 600; padding: .55rem 1rem;
+      }}
+      button[kind="primary"]:hover, [data-testid="stBaseButton-primary"]:hover {{
+        background: {BLUE_DARK}; border-color: {BLUE_DARK}; color: #fff;
+      }}
+      [data-testid="stMetricValue"] {{ color: {BLUE_DARK}; }}
+      .disclaimer {{
+        background: #FFF8E6; border: 1px solid #F3DDA0; color: #5B4500; border-radius: 12px;
+        padding: .65rem .9rem; font-size: .9rem; margin: 0 0 1rem 0;
+      }}
+      .app-footer {{ color: #5B6B80; font-size: .85rem; text-align: center; margin-top: 1.5rem; }}
+      .app-footer a {{ color: {BLUE}; }}
+
       @media (max-width: 640px) {{
-        .block-container {{ padding-left: 1rem; padding-right: 1rem; padding-top: 1rem; }}
-        .app-header {{ padding: 1rem 1.1rem; }}
+        .block-container {{ padding-left: 1rem; padding-right: 1rem; padding-top: 3.4rem; }}
+        .hero {{ padding: 1.1rem 1.2rem; border-radius: 14px; }}
       }}
     </style>
-    <div class="app-header">
+
+    <div class="hero">
       <h1>Chest X-Ray Classification</h1>
-      <p>A research demo that runs a pretrained deep-learning model (DenseNet121) to suggest one of
-      six chest X-ray classes, and flags images it is unsure about or cannot classify.</p>
+      <p>Upload a chest X-ray and a pretrained deep-learning model returns a research-grade
+      suggestion, flagging images it is unsure about or cannot classify.</p>
+      <div class="steps">
+        <span class="step">1 &nbsp;Upload</span>
+        <span class="step">2 &nbsp;Classify</span>
+        <span class="step">3 &nbsp;Review the result</span>
+      </div>
     </div>
     """,
     unsafe_allow_html=True,
@@ -73,13 +116,13 @@ def get_classifier():
 with st.sidebar:
     st.header("About")
     st.write(
-        "Upload a chest X-ray and the model returns the most likely class among "
-        "**Covid-19, Emphysema, Normal, Pneumonia-Bacterial, Pneumonia-Viral** and **Tuberculosis**."
+        "A research demo that runs a pretrained chest X-ray model. It is meant for learning and "
+        "experimentation, not for clinical use."
     )
     st.subheader("How it works")
     st.markdown(
-        "1. An out-of-distribution check rejects images that do not look like chest X-rays.\n"
-        "2. A fine-tuned DenseNet121 scores the six classes.\n"
+        "1. A check rejects images that do not look like chest X-rays.\n"
+        "2. A fine-tuned DenseNet121 scores the image.\n"
         f"3. If the top score is below {mu.CONFIDENCE_THRESHOLD:.0%}, the result is flagged for review."
     )
     st.subheader("Model attribution")
@@ -94,7 +137,11 @@ with st.sidebar:
         "Uploaded images are processed in memory and are not stored by this app."
     )
 
-st.info(DISCLAIMER, icon="⚠️")
+st.markdown(
+    f'<div class="disclaimer">⚠️ {DISCLAIMER.replace("**", "")} Always consult a qualified '
+    "healthcare professional.</div>",
+    unsafe_allow_html=True,
+)
 
 # --------------------------------------------------------------------------- result rendering
 
@@ -148,7 +195,7 @@ def render_result(result: mu.ClassificationResult) -> None:
         top_class = rows[0][0]
         chart = (
             alt.Chart(chart_df)
-            .mark_bar()
+            .mark_bar(cornerRadiusEnd=4)
             .encode(
                 x=alt.X(
                     "Probability:Q",
@@ -168,72 +215,77 @@ def render_result(result: mu.ClassificationResult) -> None:
 
 # --------------------------------------------------------------------------- main flow
 
-uploaded = st.file_uploader(
-    "Upload a chest X-ray image",
-    type=["jpg", "jpeg", "png"],
-    help="JPG, JPEG or PNG, up to 10 MB.",
-)
+upload_col, result_col = st.columns(2, gap="large")
 
+uploaded = None
 image = None
 file_id = None
-if uploaded is not None:
-    raw_bytes = uploaded.getvalue()
-    file_id = hashlib.sha256(raw_bytes).hexdigest()
-    try:
-        image = mu.load_image(raw_bytes)
-    except mu.InvalidImageError as exc:
-        st.error(f"Invalid image: {exc}")
 
-preview_col, result_col = st.columns(2, gap="large")
+with upload_col:
+    with st.container(border=True):
+        st.subheader("1. Upload image")
+        uploaded = st.file_uploader(
+            "Upload a chest X-ray image",
+            type=["jpg", "jpeg", "png"],
+            max_upload_size=mu.MAX_UPLOAD_BYTES // (1024 * 1024),
+            label_visibility="collapsed",
+            help="JPG, JPEG or PNG, up to 10 MB.",
+        )
+        if uploaded is not None:
+            raw_bytes = uploaded.getvalue()
+            file_id = hashlib.sha256(raw_bytes).hexdigest()
+            try:
+                image = mu.load_image(raw_bytes)
+            except mu.InvalidImageError as exc:
+                st.error(f"Invalid image: {exc}")
 
-with preview_col:
-    st.subheader("Image preview")
-    if image is not None:
-        st.image(image, caption=f"{uploaded.name} ({image.width} x {image.height}px)", width="stretch")
-    elif uploaded is None:
-        st.info("No image yet. Upload a JPG, JPEG or PNG chest X-ray above to get started.")
+        if image is not None:
+            st.image(image, caption=f"{uploaded.name} ({image.width} x {image.height}px)", width="stretch")
+        elif uploaded is None:
+            st.info("No image yet. Upload a JPG, JPEG or PNG chest X-ray to get started.")
 
 with result_col:
-    st.subheader("Result")
-    clicked = st.button("Classify X-ray", type="primary", width="stretch")
+    with st.container(border=True):
+        st.subheader("2. Result")
+        clicked = st.button("Classify X-ray", type="primary", width="stretch")
 
-    if clicked:
-        if uploaded is None:
-            st.warning("Please upload a chest X-ray image first.")
-        elif image is not None:
-            try:
-                classifier = get_classifier()
-                with st.spinner("Analysing the image..."):
-                    result = mu.classify(classifier, image)
-                st.session_state["outcome"] = {"file_id": file_id, "result": result}
-            except mu.ClassifierError as exc:
-                st.session_state["outcome"] = {
-                    "file_id": file_id,
-                    "error": str(exc),
-                    "kind": type(exc).__name__,
-                }
+        if clicked:
+            if uploaded is None:
+                st.warning("Please upload a chest X-ray image first.")
+            elif image is not None:
+                try:
+                    classifier = get_classifier()
+                    with st.spinner("Analysing the image..."):
+                        result = mu.classify(classifier, image)
+                    st.session_state["outcome"] = {"file_id": file_id, "result": result}
+                except mu.ClassifierError as exc:
+                    st.session_state["outcome"] = {
+                        "file_id": file_id,
+                        "error": str(exc),
+                        "kind": type(exc).__name__,
+                    }
 
-    outcome = st.session_state.get("outcome")
-    if outcome and outcome["file_id"] == file_id and file_id is not None:
-        if "error" in outcome:
-            if outcome["kind"] == "ModelLoadError":
-                st.error(f"Model unavailable. {outcome['error']}")
-                st.caption("Press **Classify X-ray** again to retry the download.")
-            elif outcome["kind"] == "InferenceError":
-                st.error(f"Classification failed. {outcome['error']}")
+        outcome = st.session_state.get("outcome")
+        if outcome and outcome["file_id"] == file_id and file_id is not None:
+            if "error" in outcome:
+                if outcome["kind"] == "ModelLoadError":
+                    st.error(f"Model unavailable. {outcome['error']}")
+                    st.caption("Press **Classify X-ray** again to retry the download.")
+                elif outcome["kind"] == "InferenceError":
+                    st.error(f"Classification failed. {outcome['error']}")
+                else:
+                    st.error(f"Unexpected model output. {outcome['error']}")
             else:
-                st.error(f"Unexpected model output. {outcome['error']}")
-        else:
-            render_result(outcome["result"])
-    elif image is not None and not clicked:
-        st.info("Press **Classify X-ray** to run the model on this image.")
-    elif uploaded is None and not clicked:
-        st.caption("Results will appear here.")
+                render_result(outcome["result"])
+        elif image is not None and not clicked:
+            st.info("Press **Classify X-ray** to run the model on this image.")
+        elif uploaded is None and not clicked:
+            st.caption("Your result will appear here after you upload an image and press the button.")
 
 # --------------------------------------------------------------------------- footer
 
-st.divider()
-st.caption(
-    f"Model: [{mu.REPO_ID}]({mu.REPO_URL}) · Research and education only · "
-    "Not a medical device · Not clinically validated."
+st.markdown(
+    f'<div class="app-footer">Model: <a href="{mu.REPO_URL}" target="_blank">{mu.REPO_ID}</a> · '
+    "Research and education only · Not a medical device · Not clinically validated.</div>",
+    unsafe_allow_html=True,
 )
